@@ -4,17 +4,15 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const app = express();
-
 const PORT = 3000;
 const COOKIE_SECRET = "trabalhoGaby&JuliaM1";
 
-// --- paths para servir o login.html ---
+// Configuração de caminhos
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-// ajuste o caminho conforme sua pasta real do login.html
 const publicDir = path.join(__dirname, "..", "public");
 
-// dados mocados usuarios
+// Dados mocados
 const users = [
   { login: "admin1", senha: "1234", nome: "Julia ballmann", email: 'juliaBallman@email.com' },
   { login: "admin2", senha: "5678", nome: "Gabrielly Nascimento", email: 'gabrielly@email.com' }
@@ -25,11 +23,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(COOKIE_SECRET));
 app.use(express.static(publicDir));
 
-// função get para usar o usuario cookies
+// Função para obter dados do usuário dos cookies
 function getUserCookies(req) {
   const auth = req.signedCookies?.auth;
-
   if (!auth) return null;
+
   try {
     const data = JSON.parse(auth);
     if (data?.login && data?.nome) {
@@ -43,12 +41,12 @@ function getUserCookies(req) {
       };;
     }
   } catch (error) {
-    console.error('Erro ao parsear cookie:', error);
+    console.error('Erro ao parsear cookiede autenticação:', error);
   }
   return null;
 }
 
-// função para requerir a autenticação
+// Middleware para requerer autenticação
 function requireAuth(req, res, next) {
   const user = getUserCookies(req);
   if (!user) {
@@ -74,6 +72,8 @@ function requireAuth(req, res, next) {
 }
 
 // Rotas
+
+// Rota principal
 app.get("/", (req, res) => {
   const user = getUserCookies(req);
   if (user) return res.redirect("/restrito");
@@ -81,16 +81,17 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(publicDir, "login.html"));
 });
 
-// POST - login -> valida credenciais e redireciona
+// Rota POST "/login" -> valida credenciais e redireciona
 app.post("/login", (req, res) => {
-  const { login, senha, remember } = req.body; // <-- nome igual ao do form
+  const { login, senha, remember } = req.body;
   if (!login || !senha) {
     return res.status(404)
   }
 
-  const found = users.find((u) => u.login === login && u.senha === senha);
-  if (!found) {
-    // credenciais inválidas => volta ao login com ?erro=1 (opcional)
+  const foundUser = users.find((u) => u.login === login && u.senha === senha);
+  if (!foundUser) {
+    // credenciais inválidas => volta ao login com ?erro=1 
+    res.clearCookie("auth");
     return res.redirect("/?erro=1");
   }
 
@@ -116,14 +117,12 @@ app.post("/login", (req, res) => {
   }
 
   res.cookie("auth", JSON.stringify(userData), cookiesOptions);
-
   res.redirect("/restrito");
 });
 
-// tela de acesso restrito
+// Rota da área restrita
 app.get("/restrito", requireAuth, (req, res) => {
   const { nome, login, firstAccess, lastAccess, remember, expiryDate } = req.user;
-
 
   const cookieInfo = remember
     ? `Persistente (3 dias) - Expira: ${new Date(expiryDate).toLocaleString('pt-BR')}`
@@ -190,6 +189,7 @@ app.get("/restrito", requireAuth, (req, res) => {
 </html>`);
 })
 
+// Rota de logout
 app.get("/logout", (req, res) => {
   res.clearCookie("auth");
   res.redirect("/");
@@ -197,4 +197,7 @@ app.get("/logout", (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`servidor rodando em http://localhost:${PORT}`);
+  users.forEach(user => {
+    console.log(`   Login: ${user.login} | Senha: ${user.senha} | Nome: ${user.nome}`);
+  });
 });
