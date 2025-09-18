@@ -103,8 +103,8 @@ app.post("/login", (req, res) => {
 
   const now = new Date();
   const userData = {
-    login: found.login,
-    nome: found.nome,
+    login: foundUser.login,
+    nome: foundUser.nome,
     firstAccess: now.toISOString(),
     lastAccess: now.toISOString(),
     remember: !!remember
@@ -201,3 +201,24 @@ app.listen(PORT, () => {
     console.log(`   Login: ${user.login} | Senha: ${user.senha} | Nome: ${user.nome}`);
   });
 });
+
+
+// 1. Retornar JSON (que já sabemos fazer)
+app.get("/usuarios", (req, res) => {
+    res.json({ nome: "Ana", idade: 13 });
+});
+
+// 2. Retornar texto simples
+app.get("/ola", (req, res) => {
+    res.send("Olá, mundo!");
+});
+
+
+// 3. Retornar páginas HTML! 🎉
+app.get("/", (req, res) => {
+    res.sendFile(path.join(publicDir, "login.html"));
+});
+
+
+
+
