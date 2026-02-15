@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Sistema de Autenticação</title>
+  </head>
+  <body text="#2c3e50">
+    <h1>Sistema de Autenticação</h1>
+    <h2>Faça seu login</h2>
+
+    <form action="/login" method="POST">
+      <div>
+        <label for="login">Login:</label><br />
+        <input type="text" id="login" name="login" required />
+      </div>
+      <br />
+
+      <div>
+        <label for="senha">Senha:</label><br />
+        <input type="password" id="senha" name="senha" required />
+      </div>
+      <br />
+
+      <div>
+        <input type="checkbox" id="remember" name="remember" value="true" />
+        <label for="remember">Manter-me conectado neste computador</label>
+      </div>
+      <br />
+
+      <button type="submit">Entrar</button>
+    </form>
+
+    <!-- Exibe mensagem de erro se houver -->
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("erro") === "1") {
+        document.write(
+          '<p style="color: red;"><strong>Erro:</strong> Login ou senha inválidos. Tente novamente.</p>'
+        );
+      }
+    </script>
+
+    <hr />
+  </body>
+</html>
